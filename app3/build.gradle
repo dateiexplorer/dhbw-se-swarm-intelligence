@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+dependencies {
+
+}
+
+application {
+    mainClass = 'de.dhbw.mosbach.se.si.app3.Main'
+}
