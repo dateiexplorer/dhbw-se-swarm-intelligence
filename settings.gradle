@@ -7,7 +7,5 @@
  * in the user manual at https://docs.gradle.org/7.3.3/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'dhbw-se-swarm-intelligence'
-
-include ':app1', ':app2', ':app3'
-include ':shared'
+rootProject.name = 'de.dhbw.mosbach.se.si'
+include('app1', 'app2', 'app3', 'shared')

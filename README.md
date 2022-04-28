@@ -18,9 +18,9 @@ Build all with:
 gradle build
 ```
 
-Build a specific app, e.g. app1 with:
+Build a specific app, e.g. 'app1' with:
 ```
-gradle build :app1
+gradle app1:build
 ```
 
 Run all apps with:
@@ -28,7 +28,7 @@ Run all apps with:
 gradle run
 ```
 
-Run a specific app, e.g. app1 with:
+Run a specific app, e.g. 'app1' with:
 ```
-gradle run :app1
+gradle app1:run
 ```
