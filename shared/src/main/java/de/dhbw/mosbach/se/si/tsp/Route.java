@@ -1,38 +1,41 @@
 package de.dhbw.mosbach.se.si.tsp;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import de.dhbw.mosbach.se.si.util.DistanceFunc;
 
 public class Route {
+    private final long id;
     private final List<City> cities = new ArrayList<>();
 
-    public Route(List<City> cities) {
+    public Route(long id, List<City> cities) {
+        this.id = id;
         this.cities.addAll(cities);
     }
 
-    public Route(Route route) {
-        cities.addAll(route.cities);
+    public Route(long id, Route route) {
+        this.id = id;
+        this.cities.addAll(route.cities);
     }
 
-    public Route shuffled() {
-        var shuffled = new ArrayList<City>(cities);
-        Collections.shuffle(shuffled);
-        return new Route(shuffled);
-    }
+    // public Route shuffled() {
+    //     var shuffled = new ArrayList<City>(cities);
+    //     Collections.shuffle(shuffled);
+    //     return new Route(shuffled);
+    // }
 
     public double getTotalDistance(DistanceFunc func) {
         var size = cities.size();
         var totalDistance = 0D;
 
         // Cycle through cities, (i = size) == (i = 0)
-        for (int i = 0; i <= size; i++) {
+        for (int i = 0; i < size; i++) {
             var current = cities.get(i);
             var next = cities.get((i + 1) % size);
-            totalDistance += current.distance(next, func);
+            var distance = current.distance(next, func);
+            totalDistance += distance;
         }
 
         return totalDistance;
@@ -50,6 +53,10 @@ public class Route {
 
         s.append("]");
         return s.toString();
+    }
+
+    public long getId() {
+        return id;
     }
 
     public List<City> getCities() {
