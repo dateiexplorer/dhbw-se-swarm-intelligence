@@ -41,7 +41,7 @@ public class BruteForce {
         var route = permutator.next();
         while (!kill && route != null) {
             var fitness = route.getTotalDistance(Configuration.INSTANCE.distanceFunc);
-            System.out.println("Calculate fitness for route (id = " + route.getId() + "): " + fitness);
+            // System.out.println("Calculate fitness for route (id = " + route.getId() + "): " + fitness);
             
             // Calculate lokal optimum.
             if (fitness < bestFitness) {
