@@ -1,9 +1,10 @@
 package de.dhbw.mosbach.se.si.tsp;
 
-import de.dhbw.mosbach.se.si.util.DistanceFunc;
 import de.dhbw.mosbach.se.si.util.Vector2D;
+import de.dhbw.mosbach.se.si.util.distance.DistanceFunction;
 
 public class City {
+    
     private final String name;
     private final Vector2D location;
 
@@ -17,7 +18,7 @@ public class City {
         this.location = new Vector2D(x, y);
     }
 
-    public double distance(City other, DistanceFunc func) {
+    public double distance(City other, DistanceFunction func) {
         return func.apply(this.location, other.location);
     }
 

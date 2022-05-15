@@ -1,6 +1,7 @@
 package de.dhbw.mosbach.se.si.util;
 
 public class Vector2D {
+    
     private final double x;
     private final double y;
 

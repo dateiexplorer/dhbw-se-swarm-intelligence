@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.dhbw.mosbach.se.si.util.DistanceFunc;
+import de.dhbw.mosbach.se.si.util.distance.DistanceFunction;
 
 public class Route {
+    
     private final long id;
     private final List<City> cities = new ArrayList<>();
 
@@ -20,13 +21,7 @@ public class Route {
         this.cities.addAll(route.cities);
     }
 
-    // public Route shuffled() {
-    //     var shuffled = new ArrayList<City>(cities);
-    //     Collections.shuffle(shuffled);
-    //     return new Route(shuffled);
-    // }
-
-    public double getTotalDistance(DistanceFunc func) {
+    public double getTotalDistance(DistanceFunction func) {
         var size = cities.size();
         var totalDistance = 0D;
 

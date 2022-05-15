@@ -1,8 +1,9 @@
 package de.dhbw.mosbach.se.si.app1;
 
-import de.dhbw.mosbach.se.si.util.loader.Loader;
+import de.dhbw.mosbach.se.si.util.loader.CityLoader;
 
 public class App {
+    
     public static void main(String[] args) {
         // Initialize variables with optional command line parameters.
         for (int i = 0; i < args.length; i++) {
@@ -16,6 +17,7 @@ public class App {
                 System.exit(1);
             }
         }
+        
         // Load configurations form the paramStore.
         var tspFile = Configuration.INSTANCE.paramStore.get("input");
         if (tspFile != null) {
@@ -36,7 +38,7 @@ public class App {
         System.out.println("Set input = " + Configuration.INSTANCE.tspFile);
 
         // Load TSP data from file.
-        var loader = new Loader();
+        var loader = new CityLoader();
         var cities = loader.loadCitiesFromFile(Configuration.INSTANCE.tspFile);
         System.out.println("Load TSP with " + cities.size() + " cities");
 

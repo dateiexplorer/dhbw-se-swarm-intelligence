@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import de.dhbw.mosbach.se.si.tsp.City;
 
-public class Loader {
+public class CityLoader {
 
     public List<City> loadCitiesFromFile(String file) {
         try (var inputStream = this.getClass()
@@ -26,7 +26,7 @@ public class Loader {
 
     private List<City> parseCities(String data) {
         // This regex matches all lines that have the following syntax:
-        //     <some_identifier> <x> <y>
+        // <some_identifier> <x> <y>
         var pattern = Pattern.compile("^\\s*(\\S+)\\s+(\\d{1,})\\s+(\\d{1,3})\\s*$");
 
         var cities = new ArrayList<City>();

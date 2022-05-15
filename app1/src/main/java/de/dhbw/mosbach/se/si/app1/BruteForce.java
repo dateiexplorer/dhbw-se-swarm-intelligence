@@ -14,6 +14,7 @@ import de.dhbw.mosbach.se.si.tsp.City;
 import de.dhbw.mosbach.se.si.tsp.Route;
 
 public class BruteForce {
+    
     private final ExecutorService executor;
     private final List<Future<?>> futures;
     private Permutator permutator;
@@ -41,7 +42,7 @@ public class BruteForce {
         var route = permutator.next();
         while (!kill && route != null) {
             var fitness = route.getTotalDistance(Configuration.INSTANCE.distanceFunc);
-            // System.out.println("Calculate fitness for route (id = " + route.getId() + "): " + fitness);
+            System.out.println("Calculate fitness for route (id = " + route.getId() + "): " + fitness);
             
             // Calculate lokal optimum.
             if (fitness < bestFitness) {

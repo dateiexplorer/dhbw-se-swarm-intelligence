@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'de.dhbw.mosbach.se.si'
-include('app1', 'app2', 'app3', 'shared')
+include('app1', 'app2', 'app3', 'tsplib')

@@ -3,7 +3,8 @@ package de.dhbw.mosbach.se.si.util.random;
 import java.io.Serial;
 import java.io.Serializable;
 
-public class MersenneTwisterFast implements Serializable, Cloneable {
+public class MersenneTwisterFast implements Serializable, Cloneable, RandomGenerator {
+    
     @Serial
     private static final long serialVersionUID = -8219700664442619525L;
 
