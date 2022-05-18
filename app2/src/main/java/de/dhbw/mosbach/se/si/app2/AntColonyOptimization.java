@@ -19,7 +19,7 @@ public class AntColonyOptimization {
 
     // Use a distanceMatrix to calculate distances between all nodes to speed
     // up calculations. This matrix is unmutual and it should be safe to use
-    /// for parallel read operations.
+    // for parallel read operations.
     private final double[][] distanceMatrix;
 
     // The pheromoneMatrix stores the pheromones at the edges one node i to
@@ -75,7 +75,7 @@ public class AntColonyOptimization {
     }
 
     private void setupAnts() {
-        var numOfAnts = (int) Configuration.INSTANCE.antsPerNode * nodes.size();
+        var numOfAnts = (int) (Configuration.INSTANCE.antsPerNode * nodes.size());
         for (int i = 0; i < numOfAnts; i++) {
             antSolutionConstructors.add(
                     new Ant(this).getTrailWalker(pheromoneMatrix));
@@ -112,13 +112,15 @@ public class AntColonyOptimization {
             }
         }
 
-        if (Configuration.INSTANCE.USE_ONLY_BEST_TRAIL_FOR_PHEROMONE_UPDATE) {
-            updatePheromoneMatrixForTrail(getBestTrail(trails));
-            return;
-        }
-
-        for (var trail : trails) {
-            updatePheromoneMatrixForTrail(trail);
+        switch (Configuration.INSTANCE.pheromoneMatrixUpdateMethod) {
+            case BEST_TRAIL:
+                updatePheromoneMatrixForTrail(AntColonyOptimization.getBestTrail(trails));
+                break;
+            case ALL_TRAILS:
+            default:  
+                for (var trail : trails) {
+                    updatePheromoneMatrixForTrail(trail);
+                }
         }
     }
 
@@ -132,20 +134,32 @@ public class AntColonyOptimization {
     }
 
     private void updateBestTrail(List<Trail> trails) {
-        var bestTrail = getBestTrail(trails);
+        var bestTrail = AntColonyOptimization.getBestTrail(trails);
         if (bestTrail.length() < bestTrailLength) {
             this.bestTrail = bestTrail;
             this.bestTrailLength = bestTrail.length();
         }
     }
 
-    private Trail getBestTrail(List<Trail> trails) {
-        Trail bestTrail = null;
-        var bestTrailLength = Double.MAX_VALUE;
+    private double calculateDivergence(List<Trail> trails) {
+        var trailLengthCum = 0.0;
         for (var trail : trails) {
-            if (trail.length() < bestTrailLength) {
-                bestTrail = trail;
-                bestTrailLength = trail.length();
+            trailLengthCum += trail.length();
+        }
+
+        // Calculate the average divergence between all length from the trails
+        // of the current iteration and the current best trail.
+        // A less value indicates that more ants found the (or a) best solution.
+        return 1.0 - (this.bestTrailLength / (trailLengthCum / trails.size()));
+    }
+
+    private static Trail getBestTrail(List<Trail> trails) {
+        Trail bestTrail = trails.get(0);
+        var bestTrailLength = bestTrail.length();
+        for (int i = 1; i < trails.size(); i++) {
+            if (trails.get(i).length() < bestTrailLength) {
+                bestTrail = trails.get(i);
+                bestTrailLength = bestTrail.length();
             }
         }
 
@@ -161,17 +175,17 @@ public class AntColonyOptimization {
             updateBestTrail(trails);
             updatePheromoneMatrix(trails);
 
-            // var bestTrailLength = Double.MAX_VALUE;
-            // for (var trail : trails) {
-            // var trailLength = trail.length();
-            // if (trailLength < bestTrailLength) {
-            // bestTrailLength = trailLength;
-            // }
-            // }
-
-            System.out.println(i + " > bestTrail.length(): " + bestTrail.length());
+            // Terminate the algorithm, if the divergence of ant solutions is less than
+            // the defined divergence.
+            var divergence = calculateDivergence(trails);
+            
+            System.out.println(i + " > bestTrail.length(): " + bestTrail.length() + " divergence: " + divergence);
+            if (divergence < Configuration.INSTANCE.divergenceToTerminate) {
+                break;
+            }
         }
 
+        executor.shutdownNow();
         return bestTrail.toRoute(0);
     }
 

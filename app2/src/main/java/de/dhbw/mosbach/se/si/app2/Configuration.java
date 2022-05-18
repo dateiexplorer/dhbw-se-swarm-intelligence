@@ -21,16 +21,17 @@ public enum Configuration {
 
     public String tspFile = "a280.tsp";
 
-    public int maxIterations = 3000;
-    public double antsPerNode = 0.8;
+    public int maxIterations = 3000; // 3000
+    public double antsPerNode = 0.8; // 0.8
     public double initialPheromonValue = 1.0;
-    public double evaporation = 0.05;
-    public double q = 100;
-    public double alpha = 1.5;
-    public double beta = 2;
-    public double randomFactor = 0.0001;
+    public double evaporation = 0.006; // 0.006
+    public double q = 100; // 100
+    public double alpha = 1.35; // 1.35
+    public double beta = 2.0; // 2.0
+    public double randomFactor = 0.0001; // 0.0001
 
-    // Optional flags
+    public double divergenceToTerminate = 1e-3; // 1e-3
 
-    public final boolean USE_ONLY_BEST_TRAIL_FOR_PHEROMONE_UPDATE = false;
+    public PheromoneMatrixUpdateMethod pheromoneMatrixUpdateMethod =
+        PheromoneMatrixUpdateMethod.BEST_TRAIL; // BEST_TRAIL
 }
