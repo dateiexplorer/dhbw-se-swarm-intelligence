@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import de.dhbw.mosbach.se.si.tsp.City;
+import de.dhbw.mosbach.se.si.tsp.Node;
 
-public class CityLoader {
+public class NodeLoader {
 
-    public List<City> loadCitiesFromFile(String file) {
+    public List<Node> loadNodesFromFile(String file) {
         try (var inputStream = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream(file)) {
 
             var data = inputStream.readAllBytes();
-            return parseCities(new String(data, StandardCharsets.UTF_8));
+            return parseNodes(new String(data, StandardCharsets.UTF_8));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -24,22 +24,22 @@ public class CityLoader {
         throw new RuntimeException(String.format("File '%s' couldn't be load properly", file));
     }
 
-    private List<City> parseCities(String data) {
+    private List<Node> parseNodes(String data) {
         // This regex matches all lines that have the following syntax:
         // <some_identifier> <x> <y>
         var pattern = Pattern.compile("^\\s*(\\S+)\\s+(\\d{1,})\\s+(\\d{1,})\\s*$");
 
-        var cities = new ArrayList<City>();
+        var nodes = new ArrayList<Node>();
         for (var line : data.lines().collect(Collectors.toList())) {
             var matcher = pattern.matcher(line);
             if (matcher.matches()) {
-                cities.add(new City(matcher.group(1),
+                nodes.add(new Node(matcher.group(1),
                     Integer.parseInt(matcher.group(2)),
                     Integer.parseInt(matcher.group(3))
                 ));
             }
         }
 
-        return cities;
+        return nodes;
     }
 }

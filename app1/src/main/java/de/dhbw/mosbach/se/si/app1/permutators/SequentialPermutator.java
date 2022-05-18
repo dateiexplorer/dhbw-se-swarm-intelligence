@@ -4,47 +4,47 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.dhbw.mosbach.se.si.tsp.City;
+import de.dhbw.mosbach.se.si.tsp.Node;
 import de.dhbw.mosbach.se.si.tsp.Route;
 
 public class SequentialPermutator implements Permutator {
 
-    private List<City> cities;
+    private List<Node> nodes;
     private final int[] indexes;
     private final int size;
     
     private int currentIndex = -1;
     private long idCounter = 0;
 
-    public SequentialPermutator(List<City> cities) {
-        this.cities = new ArrayList<City>(cities);
+    public SequentialPermutator(List<Node> nodes) {
+        this.nodes = new ArrayList<Node>(nodes);
 
-        size = cities.size();
+        size = nodes.size();
         indexes = new int[size];
     }
 
     // This function is heavily inspired by
     // https://www.baeldung.com/java-array-permutations
-    private List<City> permute(List<City> cities) {
+    private List<Node> permute(List<Node> nodes) {
         if (currentIndex >= size) {
             return null;
         }
 
         if (indexes[currentIndex] < currentIndex) {
-            swap(cities,
+            swap(nodes,
                 currentIndex % 2 == 0 ? 0 : indexes[currentIndex],
                 currentIndex);
             indexes[currentIndex]++;
             currentIndex = 0;
-            return cities;
+            return nodes;
         } else {
             indexes[currentIndex] = 0;
             currentIndex++;
-            return permute(cities);
+            return permute(nodes);
         }
     }
 
-    private void swap(List<City> list, int a, int b) {
+    private void swap(List<Node> list, int a, int b) {
         Collections.swap(list, a, b);
     }
 
@@ -54,13 +54,13 @@ public class SequentialPermutator implements Permutator {
         // Get first time the list unmodified.
         if (currentIndex == -1) {
             currentIndex++;
-            return new Route(idCounter++, cities);
+            return new Route(idCounter++, nodes);
         }
 
         // Get permuted list.
-        var permutedCities = permute(cities);
-        if (permutedCities != null) {
-            return new Route(idCounter++, permutedCities);
+        var permutedNodes = permute(nodes);
+        if (permutedNodes != null) {
+            return new Route(idCounter++, permutedNodes);
         }        
 
         return null;

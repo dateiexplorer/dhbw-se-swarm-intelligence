@@ -1,5 +1,5 @@
 NAME : octagon
-COMMENT : this is an octagon with a min. fitness of 9.6568
+COMMENT : this is an octagon with a min. length of 9.6568
 TYPE : TSP
 DIMENSION: 8
 EDGE_WEIGHT_TYPE : EUC_2D

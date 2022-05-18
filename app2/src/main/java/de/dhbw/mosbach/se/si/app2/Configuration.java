@@ -22,7 +22,7 @@ public enum Configuration {
     public String tspFile = "a280.tsp";
 
     public int maxIterations = 3000;
-    public int numberOfAnts = 240;
+    public double antsPerNode = 0.8;
     public double initialPheromonValue = 1.0;
     public double evaporation = 0.05;
     public double q = 100;

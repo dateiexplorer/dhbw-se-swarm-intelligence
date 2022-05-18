@@ -17,6 +17,6 @@ public enum Configuration {
     public final HashMap<String, String> paramStore = new HashMap<String, String>();
     
     public String tspFile = "octagon.tsp";
-
+    
     public int timeoutInMinutes = 1;
 }

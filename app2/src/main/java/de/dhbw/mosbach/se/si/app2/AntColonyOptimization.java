@@ -7,67 +7,66 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import de.dhbw.mosbach.se.si.app2.ant.Ant;
-import de.dhbw.mosbach.se.si.app2.ant.Trail;
-import de.dhbw.mosbach.se.si.tsp.City;
+import de.dhbw.mosbach.se.si.app2.agents.Ant;
+import de.dhbw.mosbach.se.si.app2.agents.Trail;
+import de.dhbw.mosbach.se.si.tsp.Node;
 import de.dhbw.mosbach.se.si.tsp.Route;
 import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 
 public class AntColonyOptimization {
-    
+
     private final ExecutorService executor;
 
-    // Use a distanceMatrix to calculate distances between all cities to speed
+    // Use a distanceMatrix to calculate distances between all nodes to speed
     // up calculations. This matrix is unmutual and it should be safe to use
     /// for parallel read operations.
     private final double[][] distanceMatrix;
 
-    // The pheromoneMatrix stores the pheromones at the edges one city i to
-    // another city j.
+    // The pheromoneMatrix stores the pheromones at the edges one node i to
+    // another node j.
     // The values changes each iteration. It should be safe to use for parallel
     // read operations if no parallel thread writes the pheromoneMatrix.
     private final double[][] pheromoneMatrix;
-    
-    // List of cities. This list in unmutual.
-    private final List<City> cities;
 
-    // List of Callables that let an ant run and construct new solutions. 
+    // List of nodes. This list in unmutual.
+    private final List<Node> nodes;
+
+    // List of Callables that let an ant run and construct new solutions.
     private final List<Callable<Trail>> antSolutionConstructors;
 
     // Store the current best trail with the corresponding length
     private Trail bestTrail = null;
     private double bestTrailLength = Double.MAX_VALUE;
 
-    public AntColonyOptimization(List<City> cities) {
-        this.cities = cities;
+    public AntColonyOptimization(List<Node> nodes) {
+        this.nodes = nodes;
 
         executor = Executors.newFixedThreadPool(Configuration.INSTANCE.threads);
         antSolutionConstructors = new ArrayList<>();
 
-        distanceMatrix = generateDistanceMatrix(cities);
-        pheromoneMatrix = new double[cities.size()][cities.size()];
+        distanceMatrix = generateDistanceMatrix(nodes);
+        pheromoneMatrix = new double[nodes.size()][nodes.size()];
     }
 
     /**
      * Generates a 2-dimensional matrix wich contains all distances to all
-     * cities.
+     * nodes.
      * 
-     * @param cities - List of cities for the TSP problem.
+     * @param nodes - List of nodes for the TSP problem
      * @return Returns a 2-dimensional distance matrix.
      */
-    private double[][] generateDistanceMatrix(List<City> cities) {
-        var numOfCities = cities.size();
-        var distanceMatrix = new double[numOfCities][numOfCities];
-        
-        for (int i = 0; i < numOfCities; i++) {
-            for (int j = 0; j < numOfCities; j++) {
+    private double[][] generateDistanceMatrix(List<Node> nodes) {
+        var numOfNodes = nodes.size();
+        var distanceMatrix = new double[numOfNodes][numOfNodes];
+
+        for (int i = 0; i < numOfNodes; i++) {
+            for (int j = 0; j < numOfNodes; j++) {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
                 } else {
-                    var from = cities.get(i);
-                    var to = cities.get(j);
-                    distanceMatrix[i][j] =
-                        from.distance(to, Configuration.INSTANCE.distanceFunc);
+                    var from = nodes.get(i);
+                    var to = nodes.get(j);
+                    distanceMatrix[i][j] = from.distance(to, Configuration.INSTANCE.distanceFunc);
                 }
             }
         }
@@ -76,9 +75,10 @@ public class AntColonyOptimization {
     }
 
     private void setupAnts() {
-        for (int i = 0; i < Configuration.INSTANCE.numberOfAnts; i++) {
+        var numOfAnts = (int) Configuration.INSTANCE.antsPerNode * nodes.size();
+        for (int i = 0; i < numOfAnts; i++) {
             antSolutionConstructors.add(
-                new Ant(this).new Walker(pheromoneMatrix));
+                    new Ant(this).getTrailWalker(pheromoneMatrix));
         }
     }
 
@@ -98,16 +98,16 @@ public class AntColonyOptimization {
     }
 
     private void initPheromonMatrix() {
-        for (int i = 0; i < cities.size(); i++) {
-            for (int j = 0; j < cities.size(); j++) {
+        for (int i = 0; i < nodes.size(); i++) {
+            for (int j = 0; j < nodes.size(); j++) {
                 pheromoneMatrix[i][j] = Configuration.INSTANCE.initialPheromonValue;
             }
         }
     }
 
     private void updatePheromoneMatrix(List<Trail> trails) {
-        for (int i = 0; i < cities.size(); i++) {
-            for (int j = 0; j < cities.size(); j++) {
+        for (int i = 0; i < nodes.size(); i++) {
+            for (int j = 0; j < nodes.size(); j++) {
                 pheromoneMatrix[i][j] *= (1.0 - Configuration.INSTANCE.evaporation);
             }
         }
@@ -124,11 +124,11 @@ public class AntColonyOptimization {
 
     private void updatePheromoneMatrixForTrail(Trail trail) {
         var contribution = Configuration.INSTANCE.q / trail.length();
-        for (int i = 0 ; i < cities.size() - 1; i++) {
-            pheromoneMatrix[trail.getCityIndex(i)][trail.getCityIndex(i + 1)] += contribution;
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            pheromoneMatrix[trail.getNodeIndex(i)][trail.getNodeIndex(i + 1)] += contribution;
         }
 
-        pheromoneMatrix[trail.getCityIndex(cities.size() - 1)][trail.getCityIndex(0)] += contribution;
+        pheromoneMatrix[trail.getNodeIndex(nodes.size() - 1)][trail.getNodeIndex(0)] += contribution;
     }
 
     private void updateBestTrail(List<Trail> trails) {
@@ -153,7 +153,7 @@ public class AntColonyOptimization {
     }
 
     public Route run() {
-        setupAnts();       
+        setupAnts();
         initPheromonMatrix();
 
         for (int i = 0; i < Configuration.INSTANCE.maxIterations; i++) {
@@ -163,10 +163,10 @@ public class AntColonyOptimization {
 
             // var bestTrailLength = Double.MAX_VALUE;
             // for (var trail : trails) {
-            //     var trailLength = trail.length();
-            //     if (trailLength < bestTrailLength) {
-            //         bestTrailLength = trailLength;
-            //     }
+            // var trailLength = trail.length();
+            // if (trailLength < bestTrailLength) {
+            // bestTrailLength = trailLength;
+            // }
             // }
 
             System.out.println(i + " > bestTrail.length(): " + bestTrail.length());
@@ -175,8 +175,10 @@ public class AntColonyOptimization {
         return bestTrail.toRoute(0);
     }
 
-    public List<City> getCities() {
-        return cities;
+    // Getter and setter
+
+    public List<Node> getNodes() {
+        return nodes;
     }
 
     public double[][] getDistanceMatrix() {

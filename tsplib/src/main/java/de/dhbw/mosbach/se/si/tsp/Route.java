@@ -9,26 +9,26 @@ import de.dhbw.mosbach.se.si.util.distance.DistanceFunction;
 public class Route {
     
     private final long id;
-    private final List<City> cities = new ArrayList<>();
+    private final List<Node> nodes = new ArrayList<>();
 
-    public Route(long id, List<City> cities) {
+    public Route(long id, List<Node> nodes) {
         this.id = id;
-        this.cities.addAll(cities);
+        this.nodes.addAll(nodes);
     }
 
     public Route(long id, Route route) {
         this.id = id;
-        this.cities.addAll(route.cities);
+        this.nodes.addAll(route.nodes);
     }
 
     public double getTotalDistance(DistanceFunction func) {
-        var size = cities.size();
+        var size = nodes.size();
         var totalDistance = 0D;
 
-        // Cycle through cities, (i = size) == (i = 0)
+        // Cycle through nodes, (i = size) == (i = 0)
         for (int i = 0; i < size; i++) {
-            var current = cities.get(i);
-            var next = cities.get((i + 1) % size);
+            var current = nodes.get(i);
+            var next = nodes.get((i + 1) % size);
             var distance = current.distance(next, func);
             totalDistance += distance;
         }
@@ -41,9 +41,9 @@ public class Route {
         var s = new StringBuilder();
         s.append("[");
 
-        // Separate city names by commas.
-        s.append(cities.stream()
-            .map(City::getName)
+        // Separate node names by commas.
+        s.append(nodes.stream()
+            .map(Node::getName)
             .collect(Collectors.joining(", ")));
 
         s.append("]");
@@ -54,7 +54,7 @@ public class Route {
         return id;
     }
 
-    public List<City> getCities() {
-        return cities;
+    public List<Node> getNodes() {
+        return nodes;
     }
 }
