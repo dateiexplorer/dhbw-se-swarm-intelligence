@@ -8,13 +8,15 @@ import de.dhbw.mosbach.se.si.util.distance.EuclideanDistance;
 public enum Configuration {
     INSTANCE;
 
-    final HashMap<String, String> paramStore = new HashMap<String, String>();
+    public final int threads = Runtime.getRuntime().availableProcessors();
+    
+    public final DistanceFunction distanceFunc = new EuclideanDistance();
 
-    // Defaults
+    // Configurable through command line arguments
 
-    int threads = Runtime.getRuntime().availableProcessors();
-    int timeoutInMinutes = 1;
+    public final HashMap<String, String> paramStore = new HashMap<String, String>();
+    
+    public String tspFile = "octagon.tsp";
 
-    String tspFile = "octagon.tsp";
-    DistanceFunction distanceFunc = new EuclideanDistance();
+    public int timeoutInMinutes = 1;
 }

@@ -38,6 +38,13 @@ public class MersenneTwisterFast implements Serializable, Cloneable, RandomGener
         }
     }
 
+    @Override
+    public RandomGenerator cloneWithSeed(long seed) {
+        var mersenneTwisterFast = (MersenneTwisterFast) this.clone();
+        mersenneTwisterFast.setSeed(seed);
+        return mersenneTwisterFast;
+    }
+
     public void setSeed(long seed) {
         mt = new int[N];
 
@@ -51,6 +58,7 @@ public class MersenneTwisterFast implements Serializable, Cloneable, RandomGener
         }
     }
 
+    @Override
     public double nextDouble() {
         int y;
         int z;
@@ -112,6 +120,7 @@ public class MersenneTwisterFast implements Serializable, Cloneable, RandomGener
         return ((((long) (y >>> 6)) << 27) + (z >>> 5)) / (double) (1L << 53);
     }
 
+    @Override
     public int nextInt(int n) {
         if (n <= 0)
             throw new IllegalArgumentException("n must be positive | " + n);

@@ -27,7 +27,7 @@ public class CityLoader {
     private List<City> parseCities(String data) {
         // This regex matches all lines that have the following syntax:
         // <some_identifier> <x> <y>
-        var pattern = Pattern.compile("^\\s*(\\S+)\\s+(\\d{1,})\\s+(\\d{1,3})\\s*$");
+        var pattern = Pattern.compile("^\\s*(\\S+)\\s+(\\d{1,})\\s+(\\d{1,})\\s*$");
 
         var cities = new ArrayList<City>();
         for (var line : data.lines().collect(Collectors.toList())) {

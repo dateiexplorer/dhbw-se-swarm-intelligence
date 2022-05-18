@@ -2,38 +2,59 @@ package de.dhbw.mosbach.se.si.app2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import de.dhbw.mosbach.se.si.app2.ant.Ant;
+import de.dhbw.mosbach.se.si.app2.ant.Trail;
 import de.dhbw.mosbach.se.si.tsp.City;
 import de.dhbw.mosbach.se.si.tsp.Route;
+import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 
 public class AntColonyOptimization {
     
     private final ExecutorService executor;
 
-    // Use a distantMatrix to calculate distances between all cities to speed
+    // Use a distanceMatrix to calculate distances between all cities to speed
     // up calculations. This matrix is unmutual and it should be safe to use
-    // for parallel read operations.
+    /// for parallel read operations.
     private final double[][] distanceMatrix;
 
+    // The pheromoneMatrix stores the pheromones at the edges one city i to
+    // another city j.
+    // The values changes each iteration. It should be safe to use for parallel
+    // read operations if no parallel thread writes the pheromoneMatrix.
     private final double[][] pheromoneMatrix;
-    private final List<Ant> ants;
+    
+    // List of cities. This list in unmutual.
+    private final List<City> cities;
 
-    private List<City> cities;
+    // List of Callables that let an ant run and construct new solutions. 
+    private final List<Callable<Trail>> antSolutionConstructors;
+
+    // Store the current best trail with the corresponding length
     private Trail bestTrail = null;
     private double bestTrailLength = Double.MAX_VALUE;
 
     public AntColonyOptimization(List<City> cities) {
         this.cities = cities;
-        distanceMatrix = generateDistanceMatrix(cities);
-
-        pheromoneMatrix = new double[cities.size()][cities.size()];
-        ants = new ArrayList<>();
 
         executor = Executors.newFixedThreadPool(Configuration.INSTANCE.threads);
+        antSolutionConstructors = new ArrayList<>();
+
+        distanceMatrix = generateDistanceMatrix(cities);
+        pheromoneMatrix = new double[cities.size()][cities.size()];
     }
 
+    /**
+     * Generates a 2-dimensional matrix wich contains all distances to all
+     * cities.
+     * 
+     * @param cities - List of cities for the TSP problem.
+     * @return Returns a 2-dimensional distance matrix.
+     */
     private double[][] generateDistanceMatrix(List<City> cities) {
         var numOfCities = cities.size();
         var distanceMatrix = new double[numOfCities][numOfCities];
@@ -43,10 +64,10 @@ public class AntColonyOptimization {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
                 } else {
-                    var fromCity = cities.get(i);
-                    var toCity = cities.get(j);
+                    var from = cities.get(i);
+                    var to = cities.get(j);
                     distanceMatrix[i][j] =
-                        fromCity.distance(toCity, Configuration.INSTANCE.distanceFunc);
+                        from.distance(to, Configuration.INSTANCE.distanceFunc);
                 }
             }
         }
@@ -56,14 +77,24 @@ public class AntColonyOptimization {
 
     private void setupAnts() {
         for (int i = 0; i < Configuration.INSTANCE.numberOfAnts; i++) {
-            ants.add(new Ant(cities, distanceMatrix));
+            antSolutionConstructors.add(
+                new Ant(this).new Walker(pheromoneMatrix));
         }
     }
 
-    private void constructAntSolutions() {
-        for (var ant : ants) {
-            ant.walkNewTrail(pheromoneMatrix);
+    private List<Trail> constructAntSolutionsParallel() {
+        var trails = new ArrayList<Trail>();
+        try {
+            for (var future : executor.invokeAll(antSolutionConstructors)) {
+                trails.add(future.get());
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
+
+        return trails;
     }
 
     private void initPheromonMatrix() {
@@ -74,32 +105,51 @@ public class AntColonyOptimization {
         }
     }
 
-    private void updatePheromonMatrix() {
+    private void updatePheromoneMatrix(List<Trail> trails) {
         for (int i = 0; i < cities.size(); i++) {
             for (int j = 0; j < cities.size(); j++) {
                 pheromoneMatrix[i][j] *= (1.0 - Configuration.INSTANCE.evaporation);
             }
         }
 
-        for (var ant : ants) {
-            var contribution = Configuration.INSTANCE.q / ant.getTrail().length();
+        if (Configuration.INSTANCE.USE_ONLY_BEST_TRAIL_FOR_PHEROMONE_UPDATE) {
+            updatePheromoneMatrixForTrail(getBestTrail(trails));
+            return;
+        }
 
-            var trail = ant.getTrail();
-            for (int i = 0 ; i < cities.size() - 1; i++) {
-                pheromoneMatrix[trail.getCityIndex(i)][trail.getCityIndex(i + 1)] += contribution;
-            }
-
-            pheromoneMatrix[trail.getCityIndex(cities.size() - 1)][trail.getCityIndex(0)] += contribution;
+        for (var trail : trails) {
+            updatePheromoneMatrixForTrail(trail);
         }
     }
 
-    private void updateBestTrail() {
-        for (var ant : ants) {
-            if (ant.getTrail().length() < bestTrailLength) {
-                bestTrail = ant.getTrail();
-                bestTrailLength = ant.getTrail().length();
+    private void updatePheromoneMatrixForTrail(Trail trail) {
+        var contribution = Configuration.INSTANCE.q / trail.length();
+        for (int i = 0 ; i < cities.size() - 1; i++) {
+            pheromoneMatrix[trail.getCityIndex(i)][trail.getCityIndex(i + 1)] += contribution;
+        }
+
+        pheromoneMatrix[trail.getCityIndex(cities.size() - 1)][trail.getCityIndex(0)] += contribution;
+    }
+
+    private void updateBestTrail(List<Trail> trails) {
+        var bestTrail = getBestTrail(trails);
+        if (bestTrail.length() < bestTrailLength) {
+            this.bestTrail = bestTrail;
+            this.bestTrailLength = bestTrail.length();
+        }
+    }
+
+    private Trail getBestTrail(List<Trail> trails) {
+        Trail bestTrail = null;
+        var bestTrailLength = Double.MAX_VALUE;
+        for (var trail : trails) {
+            if (trail.length() < bestTrailLength) {
+                bestTrail = trail;
+                bestTrailLength = trail.length();
             }
         }
+
+        return bestTrail;
     }
 
     public Route run() {
@@ -107,14 +157,45 @@ public class AntColonyOptimization {
         initPheromonMatrix();
 
         for (int i = 0; i < Configuration.INSTANCE.maxIterations; i++) {
-            constructAntSolutions();
-            updatePheromonMatrix();
-            updateBestTrail();
+            var trails = constructAntSolutionsParallel();
+            updateBestTrail(trails);
+            updatePheromoneMatrix(trails);
 
-            var bestRoute = this.bestTrail.toRoute(0);
-            System.out.println(bestRoute + " (" + bestRoute.getTotalDistance(Configuration.INSTANCE.distanceFunc) + ")");
+            // var bestTrailLength = Double.MAX_VALUE;
+            // for (var trail : trails) {
+            //     var trailLength = trail.length();
+            //     if (trailLength < bestTrailLength) {
+            //         bestTrailLength = trailLength;
+            //     }
+            // }
+
+            System.out.println(i + " > bestTrail.length(): " + bestTrail.length());
         }
 
         return bestTrail.toRoute(0);
+    }
+
+    public List<City> getCities() {
+        return cities;
+    }
+
+    public double[][] getDistanceMatrix() {
+        return distanceMatrix;
+    }
+
+    public RandomGenerator getRandomGenerator() {
+        return Configuration.INSTANCE.randomGenerator;
+    }
+
+    public double getAlpha() {
+        return Configuration.INSTANCE.alpha;
+    }
+
+    public double getBeta() {
+        return Configuration.INSTANCE.beta;
+    }
+
+    public double getRandomFactor() {
+        return Configuration.INSTANCE.randomFactor;
     }
 }

@@ -10,23 +10,27 @@ import de.dhbw.mosbach.se.si.util.random.MersenneTwisterFast;
 public enum Configuration {
     INSTANCE;
 
-    final HashMap<String, String> paramStore = new HashMap<String, String>();
+    public final int threads = Runtime.getRuntime().availableProcessors();
 
-    // Defaults
-    
-    int threads = Runtime.getRuntime().availableProcessors();
-    int maxIterations = 500;
+    public final DistanceFunction distanceFunc = new EuclideanDistance();
+    public final RandomGenerator randomGenerator = new MersenneTwisterFast(System.nanoTime());
 
-    String tspFile = "a280.tsp";
-    DistanceFunction distanceFunc = new EuclideanDistance();
+    // Configurable through command line arguments
 
-    double initialPheromonValue = 1.0;
-    double evaporation = 0.1;
-    double q = 500;
-    double alpha = 2;
-    double beta = 2;
+    public final HashMap<String, String> paramStore = new HashMap<String, String>();
 
-    int numberOfAnts = 280;
+    public String tspFile = "a280.tsp";
 
-    final RandomGenerator randomGenerator = new MersenneTwisterFast(System.nanoTime());
+    public int maxIterations = 3000;
+    public int numberOfAnts = 240;
+    public double initialPheromonValue = 1.0;
+    public double evaporation = 0.05;
+    public double q = 100;
+    public double alpha = 1.5;
+    public double beta = 2;
+    public double randomFactor = 0.0001;
+
+    // Optional flags
+
+    public final boolean USE_ONLY_BEST_TRAIL_FOR_PHEROMONE_UPDATE = false;
 }
