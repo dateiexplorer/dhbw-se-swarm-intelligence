@@ -17,13 +17,13 @@ public enum Configuration {
 
     // Configurable through command line arguments
 
-    public final HashMap<String, String> paramStore = new HashMap<String, String>();
+    public final HashMap<String, String> paramStore = new HashMap<>();
 
     public String tspFile = "a280.tsp";
 
     public int maxIterations = 3000; // 3000
     public double antsPerNode = 0.8; // 0.8
-    public double initialPheromonValue = 1.0;
+    public double initialPheromoneValue = 1.0;
     public double evaporation = 0.006; // 0.006
     public double q = 100; // 100
     public double alpha = 1.35; // 1.35

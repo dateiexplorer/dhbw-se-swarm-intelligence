@@ -1,5 +1,6 @@
 package de.dhbw.mosbach.se.si.app2.agents;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -40,9 +41,7 @@ public class Ant {
     }
 
     public Callable<Trail> getTrailWalker(double[][] pheromoneMatrix) {
-        return () -> {
-            return walkNewTrail(pheromoneMatrix);
-        };
+        return () -> walkNewTrail(pheromoneMatrix);
     }
 
     public Trail walkNewTrail(double[][] pheromoneMatrix) {
@@ -78,16 +77,16 @@ public class Ant {
 
         var probabilities = calculateProbabilities(currentNodeIndex, pheromoneMatrix);
         
-        // Cummulate probabilites (value between 0.0 and 1.0)
+        // Cumulate probabilities (value between 0.0 and 1.0)
         var probabilitiesCum = 0.0;
 
         for (int i = 0; i < probabilities.length; i++) {
             probabilitiesCum += probabilities[i];
 
             // Clip the probabilitiesCum to a max. value of 1.0, because of
-            // unsharp rounding of doubles to avoid exceptions, because
+            // false rounding of doubles to avoid exceptions, because
             // probabilitiesCum should be a value between 0.0 and 1.0
-            probabilitiesCum = probabilitiesCum > 1.0 ? 1.0 : probabilitiesCum;
+            probabilitiesCum = Math.min(probabilitiesCum, 1.0);
             if (probabilitiesCum >= randomNumber) {
                 return i;
             }
@@ -103,7 +102,7 @@ public class Ant {
         // Sum up probabilities to norm probabilities.
         var probabilitiesSum = 0.0;
 
-        // Calculate probabilities for which position will be choose next from
+        // Calculate probabilities for which position will be chosen next from
         // the current position.
         for (int nextNodeIndex = 0; nextNodeIndex < numOfNodes; nextNodeIndex++) {
             // Visit nodes only once.
@@ -142,8 +141,6 @@ public class Ant {
     }
 
     private void clearVisitedInformation() {
-        for (int i = 0; i < visited.length; i++) {
-            visited[i] = false;
-        }
+        Arrays.fill(visited, false);
     }
 }

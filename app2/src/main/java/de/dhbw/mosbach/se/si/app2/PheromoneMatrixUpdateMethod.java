@@ -11,5 +11,5 @@ public enum PheromoneMatrixUpdateMethod {
      * Use only the best trail from the current iteration for the pheromone
      * contribution.
      */
-    BEST_TRAIL;
+    BEST_TRAIL
 }

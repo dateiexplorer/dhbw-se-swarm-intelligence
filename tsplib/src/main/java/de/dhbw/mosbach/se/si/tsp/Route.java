@@ -38,16 +38,12 @@ public class Route {
 
     @Override
     public String toString() {
-        var s = new StringBuilder();
-        s.append("[");
-
-        // Separate node names by commas.
-        s.append(nodes.stream()
-            .map(Node::getName)
-            .collect(Collectors.joining(", ")));
-
-        s.append("]");
-        return s.toString();
+        return "[" +
+            // Separate node names by commas.
+            nodes.stream()
+                    .map(Node::getName)
+                    .collect(Collectors.joining(", ")) +
+            "]";
     }
 
     public long getId() {

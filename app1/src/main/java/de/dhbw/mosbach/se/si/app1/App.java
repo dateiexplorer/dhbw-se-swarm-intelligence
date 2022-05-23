@@ -6,8 +6,8 @@ public class App {
     
     public static void main(String[] args) {
         // Initialize variables with optional command line parameters.
-        for (int i = 0; i < args.length; i++) {
-            var param = args[i].split("=");
+        for (String arg : args) {
+            var param = arg.split("=");
             if (param.length == 2) {
                 var key = param[0].trim();
                 var value = param[1].trim();
@@ -26,8 +26,7 @@ public class App {
         var timeoutInMinutes = Configuration.INSTANCE.paramStore.get("timeout");
         if (timeoutInMinutes != null) {
             try {
-                var t = Integer.parseInt(timeoutInMinutes);
-                Configuration.INSTANCE.timeoutInMinutes = t;
+                Configuration.INSTANCE.timeoutInMinutes = Integer.parseInt(timeoutInMinutes);
             } catch (NumberFormatException e) {
                 System.out.println("timeout t is not a valid number.");
                 System.exit(1);

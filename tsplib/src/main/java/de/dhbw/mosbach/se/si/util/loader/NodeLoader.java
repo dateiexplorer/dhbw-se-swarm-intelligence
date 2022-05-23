@@ -1,12 +1,11 @@
 package de.dhbw.mosbach.se.si.util.loader;
 
+import de.dhbw.mosbach.se.si.tsp.Node;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import de.dhbw.mosbach.se.si.tsp.Node;
 
 public class NodeLoader {
 
@@ -15,7 +14,10 @@ public class NodeLoader {
                 .getClassLoader()
                 .getResourceAsStream(file)) {
 
-            var data = inputStream.readAllBytes();
+            byte[] data = new byte[0];
+            if (inputStream != null) {
+                data = inputStream.readAllBytes();
+            }
             return parseNodes(new String(data, StandardCharsets.UTF_8));
         } catch (Exception e) {
             e.printStackTrace();
@@ -27,10 +29,10 @@ public class NodeLoader {
     private List<Node> parseNodes(String data) {
         // This regex matches all lines that have the following syntax:
         // <some_identifier> <x> <y>
-        var pattern = Pattern.compile("^\\s*(\\S+)\\s+(\\d{1,})\\s+(\\d{1,})\\s*$");
+        var pattern = Pattern.compile("^\\s*(\\S+)\\s+(\\d+)\\s+(\\d+)\\s*$");
 
         var nodes = new ArrayList<Node>();
-        for (var line : data.lines().collect(Collectors.toList())) {
+        for (var line : data.lines().toList()) {
             var matcher = pattern.matcher(line);
             if (matcher.matches()) {
                 nodes.add(new Node(matcher.group(1),

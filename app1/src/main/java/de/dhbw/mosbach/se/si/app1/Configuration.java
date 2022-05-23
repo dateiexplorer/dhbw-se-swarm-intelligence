@@ -14,7 +14,7 @@ public enum Configuration {
 
     // Configurable through command line arguments
 
-    public final HashMap<String, String> paramStore = new HashMap<String, String>();
+    public final HashMap<String, String> paramStore = new HashMap<>();
     
     public String tspFile = "octagon.tsp";
     

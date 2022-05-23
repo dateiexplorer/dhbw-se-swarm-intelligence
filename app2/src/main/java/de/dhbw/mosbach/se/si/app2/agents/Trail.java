@@ -50,7 +50,6 @@ public class Trail {
             nodes.add(this.nodes.get(nodeIndex));
         }
 
-        var route = new Route(routeId, nodes);
-        return route;
+        return new Route(routeId, nodes);
     }
 }
