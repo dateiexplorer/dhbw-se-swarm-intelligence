@@ -12,11 +12,7 @@ public enum Configuration {
     
     public final DistanceFunction distanceFunc = new EuclideanDistance();
 
-    // Configurable through command line arguments
-
-    public final HashMap<String, String> paramStore = new HashMap<>();
+    public final String tspFile = "octagon.tsp";
     
-    public String tspFile = "octagon.tsp";
-    
-    public int timeoutInMinutes = 1;
+    public final int timeoutInMinutes = 1;
 }

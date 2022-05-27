@@ -19,8 +19,6 @@ public enum Configuration {
 
     // Configurable through command line arguments
 
-    public final HashMap<String, String> paramStore = new HashMap<>();
-
     public final ParameterConfiguration defaultParamConfig =
             new ParameterConfiguration(
                     "a280.tsp",
