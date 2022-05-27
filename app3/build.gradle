@@ -8,9 +8,21 @@ plugins {
 
 dependencies {
     implementation project(':tsplib')
+    implementation project(':app2')
+    implementation 'com.google.code.gson:gson:2.9.0'
 }
 
 application {
     // Define the main class for the application.
     mainClass = 'de.dhbw.mosbach.se.si.app3.App'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'de.dhbw.mosbach.se.si.app3.App'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

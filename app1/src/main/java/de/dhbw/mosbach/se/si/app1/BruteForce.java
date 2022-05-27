@@ -17,7 +17,7 @@ public class BruteForce {
     
     private final ExecutorService executor;
     private final List<Future<?>> futures;
-    private PermutationIterator permutator;
+    private PermutationIterator permutationIterator;
 
     // Initial bestRouteLength and bestRoute.
     private Route bestRoute = null;
@@ -32,14 +32,14 @@ public class BruteForce {
         futures = new ArrayList<>();
         
         // Iterator that get back all permutations of nodes.
-        permutator = new SequentialPermutationIterator(nodes);
+        permutationIterator = new SequentialPermutationIterator(nodes);
     }
 
     private final Runnable searchBestRoute = () -> {
         Route bestRoute = null;
         var bestRouteLength = Double.MAX_VALUE;
 
-        var route = permutator.next();
+        var route = permutationIterator.next();
         while (!kill && route != null) {
             var routeLength = route.getTotalDistance(Configuration.INSTANCE.distanceFunc);
             System.out.println("Calculate length for route (id = " + route.getId() + "): " + routeLength);
@@ -54,7 +54,7 @@ public class BruteForce {
                 bestRoute = route;
             }
 
-            route = permutator.next();
+            route = permutationIterator.next();
         }
 
         // Update global optimum. Synchronize for all threads.

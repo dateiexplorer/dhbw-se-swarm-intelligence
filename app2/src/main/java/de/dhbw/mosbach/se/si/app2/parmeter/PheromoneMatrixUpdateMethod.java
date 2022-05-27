@@ -1,4 +1,4 @@
-package de.dhbw.mosbach.se.si.app2;
+package de.dhbw.mosbach.se.si.app2.parmeter;
 
 public enum PheromoneMatrixUpdateMethod {
 

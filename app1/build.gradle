@@ -14,3 +14,13 @@ application {
     // Define the main class for the application.
     mainClass = 'de.dhbw.mosbach.se.si.app1.App'
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'de.dhbw.mosbach.se.si.app1.App'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

@@ -9,11 +9,14 @@ import java.util.concurrent.Executors;
 
 import de.dhbw.mosbach.se.si.app2.agents.Ant;
 import de.dhbw.mosbach.se.si.app2.agents.Trail;
+import de.dhbw.mosbach.se.si.app2.parmeter.ParameterConfiguration;
 import de.dhbw.mosbach.se.si.tsp.Node;
 import de.dhbw.mosbach.se.si.tsp.Route;
 import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 
 public class AntColonyOptimization {
+
+    private final ParameterConfiguration paramConfig;
 
     private final ExecutorService executor;
 
@@ -38,8 +41,9 @@ public class AntColonyOptimization {
     private Trail bestTrail = null;
     private double bestTrailLength = Double.MAX_VALUE;
 
-    public AntColonyOptimization(List<Node> nodes) {
+    public AntColonyOptimization(List<Node> nodes, ParameterConfiguration paramConfig) {
         this.nodes = nodes;
+        this.paramConfig = paramConfig;
 
         executor = Executors.newFixedThreadPool(Configuration.INSTANCE.threads);
         antSolutionConstructors = new ArrayList<>();
@@ -79,7 +83,7 @@ public class AntColonyOptimization {
      * antSolutionConstructors list.
      */
     private void setupAnts() {
-        var numOfAnts = (int) (Configuration.INSTANCE.antsPerNode * nodes.size());
+        var numOfAnts = (int) (paramConfig.antsPerNode() * nodes.size());
 
         antSolutionConstructors.clear();
         for (int i = 0; i < numOfAnts; i++) {
@@ -117,7 +121,7 @@ public class AntColonyOptimization {
     private void initPheromoneMatrix() {
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
-                pheromoneMatrix[i][j] = Configuration.INSTANCE.initialPheromoneValue;
+                pheromoneMatrix[i][j] = paramConfig.initialPheromoneValue();
             }
         }
     }
@@ -132,12 +136,12 @@ public class AntColonyOptimization {
         // Evaporate the values
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
-                pheromoneMatrix[i][j] *= (1.0 - Configuration.INSTANCE.evaporation);
+                pheromoneMatrix[i][j] *= (1.0 - paramConfig.evaporation());
             }
         }
 
         // Update the pheromones with the given method
-        switch (Configuration.INSTANCE.pheromoneMatrixUpdateMethod) {
+        switch (paramConfig.pheromoneMatrixUpdateMethod()) {
             case BEST_TRAIL:
                 updatePheromoneMatrixForTrail(getBestTrail(trails));
                 break;
@@ -157,7 +161,7 @@ public class AntColonyOptimization {
      *              problem
      */
     private void updatePheromoneMatrixForTrail(Trail trail) {
-        var contribution = Configuration.INSTANCE.q / trail.length();
+        var contribution = paramConfig.q() / trail.length();
         for (int i = 0; i < nodes.size() - 1; i++) {
             pheromoneMatrix[trail.getNodeIndex(i)][trail.getNodeIndex(i + 1)] += contribution;
         }
@@ -235,7 +239,7 @@ public class AntColonyOptimization {
         setupAnts();
         initPheromoneMatrix();
 
-        for (int i = 0; i < Configuration.INSTANCE.maxIterations; i++) {
+        for (int i = 0; i < paramConfig.maxIterations(); i++) {
             var trails = constructAntSolutionsParallel();
             updateBestTrail(trails);
             updatePheromoneMatrix(trails);
@@ -245,7 +249,7 @@ public class AntColonyOptimization {
             var divergence = calculateDivergence(trails);
 
             System.out.println(i + " > bestTrail.length(): " + bestTrail.length() + " divergence: " + divergence);
-            if (divergence < Configuration.INSTANCE.divergenceToTerminate) {
+            if (divergence < paramConfig.divergenceToTerminate()) {
                 break;
             }
         }
@@ -269,14 +273,14 @@ public class AntColonyOptimization {
     }
 
     public double getAlpha() {
-        return Configuration.INSTANCE.alpha;
+        return paramConfig.alpha();
     }
 
     public double getBeta() {
-        return Configuration.INSTANCE.beta;
+        return paramConfig.beta();
     }
 
     public double getRandomFactor() {
-        return Configuration.INSTANCE.randomFactor;
+        return paramConfig.randomFactor();
     }
 }

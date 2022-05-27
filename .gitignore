@@ -13,3 +13,6 @@ bin
 
 # Ignore log files
 *.log
+
+# Ignore JSON files
+*.json
