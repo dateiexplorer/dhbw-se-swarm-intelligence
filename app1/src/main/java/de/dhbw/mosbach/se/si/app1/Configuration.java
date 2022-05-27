@@ -1,7 +1,5 @@
 package de.dhbw.mosbach.se.si.app1;
 
-import java.util.HashMap;
-
 import de.dhbw.mosbach.se.si.util.distance.DistanceFunction;
 import de.dhbw.mosbach.se.si.util.distance.EuclideanDistance;
 

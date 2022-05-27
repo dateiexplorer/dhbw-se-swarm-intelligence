@@ -1,13 +1,11 @@
 package de.dhbw.mosbach.se.si.app2;
 
-import java.util.HashMap;
-
 import de.dhbw.mosbach.se.si.app2.parmeter.ParameterConfiguration;
 import de.dhbw.mosbach.se.si.app2.parmeter.PheromoneMatrixUpdateMethod;
-import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 import de.dhbw.mosbach.se.si.util.distance.DistanceFunction;
 import de.dhbw.mosbach.se.si.util.distance.EuclideanDistance;
 import de.dhbw.mosbach.se.si.util.random.MersenneTwisterFast;
+import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 
 public enum Configuration {
     INSTANCE;

@@ -5,8 +5,8 @@ import de.dhbw.mosbach.se.si.app2.parmeter.ParameterConfiguration;
 import de.dhbw.mosbach.se.si.tsp.Route;
 import de.dhbw.mosbach.se.si.util.loader.NodeLoader;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class App {
     
