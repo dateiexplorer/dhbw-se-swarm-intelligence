@@ -15,4 +15,4 @@ bin
 *.log
 
 # Ignore JSON files
-*.json
+# *.json

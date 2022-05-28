@@ -1,0 +1,13 @@
+{
+  "tspFile": "a280.tsp",
+  "maxIterations": 3000,
+  "antsPerNode": 0.8,
+  "initialPheromoneValue": 1.0,
+  "evaporation": 0.006,
+  "q": 100.0,
+  "alpha": 1.35,
+  "beta": 2.0,
+  "randomFactor": 1.0E-3,
+  "divergenceToTerminate": 0.001,
+  "pheromoneMatrixUpdateMethod": "BEST_TRAIL"
+}
