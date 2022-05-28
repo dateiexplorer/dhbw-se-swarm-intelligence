@@ -6,6 +6,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.dhbw.mosbach.se.si.app2.agents.Ant;
 import de.dhbw.mosbach.se.si.app2.agents.Trail;
@@ -15,6 +17,8 @@ import de.dhbw.mosbach.se.si.tsp.Route;
 import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 
 public class AntColonyOptimization {
+
+    private static final Logger LOGGER = Logger.getLogger(AntColonyOptimization.class.getName());
 
     private final ParameterConfiguration paramConfig;
 
@@ -45,6 +49,7 @@ public class AntColonyOptimization {
         this.nodes = nodes;
         this.paramConfig = paramConfig;
 
+        LOGGER.log(Level.INFO, "Initialize ACO with " + Configuration.INSTANCE.threads + " threads");
         executor = Executors.newFixedThreadPool(Configuration.INSTANCE.threads);
         antSolutionConstructors = new ArrayList<>();
 
@@ -60,6 +65,7 @@ public class AntColonyOptimization {
      * @return Returns a 2-dimensional distance matrix.
      */
     private double[][] generateDistanceMatrix(List<Node> nodes) {
+        LOGGER.log(Level.CONFIG, "Generate distance matrix");
         var numOfNodes = nodes.size();
         var distanceMatrix = new double[numOfNodes][numOfNodes];
 
@@ -84,6 +90,7 @@ public class AntColonyOptimization {
      */
     private void setupAnts() {
         var numOfAnts = (int) (paramConfig.antsPerNode() * nodes.size());
+        LOGGER.log(Level.CONFIG, "Setup " + numOfAnts + " ants to solve the TSP");
 
         antSolutionConstructors.clear();
         for (int i = 0; i < numOfAnts; i++) {
@@ -91,7 +98,7 @@ public class AntColonyOptimization {
             // Because this is only a reference, the values are changing for each
             // ant and each iteration without further adjustments.
             antSolutionConstructors.add(
-                    new Ant(this).getTrailWalker(pheromoneMatrix));
+                    new Ant(i,this).getTrailWalker(pheromoneMatrix));
         }
     }
 
@@ -119,6 +126,7 @@ public class AntColonyOptimization {
      * Initialize the pheromone matrix with the default pheromone value.
      */
     private void initPheromoneMatrix() {
+        LOGGER.log(Level.CONFIG, "Initialize pheromone matrix with " + paramConfig.initialPheromoneValue());
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
                 pheromoneMatrix[i][j] = paramConfig.initialPheromoneValue();
@@ -162,6 +170,8 @@ public class AntColonyOptimization {
      */
     private void updatePheromoneMatrixForTrail(Trail trail) {
         var contribution = paramConfig.q() / trail.length();
+        LOGGER.log(Level.FINEST, "Add contribution for trail of ant " + trail.getAnt().getId() +
+                " to pheromone matrix: " + contribution);
         for (int i = 0; i < nodes.size() - 1; i++) {
             pheromoneMatrix[trail.getNodeIndex(i)][trail.getNodeIndex(i + 1)] += contribution;
         }
@@ -178,6 +188,8 @@ public class AntColonyOptimization {
     private void updateBestTrail(List<Trail> trails) {
         var bestTrail = getBestTrail(trails);
         if (bestTrail.length() < bestTrailLength) {
+            LOGGER.log(Level.INFO, "Update bestTrail with length " + bestTrail.length() + ": " +
+                    bestTrail.toRoute(bestTrail.getAnt().getId()));
             this.bestTrail = bestTrail;
             this.bestTrailLength = bestTrail.length();
         }
@@ -248,12 +260,17 @@ public class AntColonyOptimization {
             // the defined divergence.
             var divergence = calculateDivergence(trails);
 
-            System.out.println(i + " > bestTrail.length(): " + bestTrail.length() + " divergence: " + divergence);
+            LOGGER.log(Level.FINE, "Iteration: " + i + ", Current best trail length: " + bestTrail.length() +
+                    ", divergence: " + divergence);
             if (divergence < paramConfig.divergenceToTerminate()) {
+                LOGGER.log(Level.INFO, "Break loop after " + i + " iterations because divergence of " +
+                        paramConfig.divergenceToTerminate() + " was reached (divergence = " + divergence + ")");
                 break;
             }
         }
 
+        LOGGER.log(Level.INFO, "Algorithm ended because max iterations (" + paramConfig.maxIterations() + ")" +
+                " where reached");
         executor.shutdownNow();
         return bestTrail.toRoute(0);
     }

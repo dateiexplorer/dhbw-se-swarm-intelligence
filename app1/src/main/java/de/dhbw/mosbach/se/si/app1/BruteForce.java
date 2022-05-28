@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.dhbw.mosbach.se.si.app1.permutators.PermutationIterator;
 import de.dhbw.mosbach.se.si.app1.permutators.SequentialPermutationIterator;
@@ -14,9 +16,13 @@ import de.dhbw.mosbach.se.si.tsp.Node;
 import de.dhbw.mosbach.se.si.tsp.Route;
 
 public class BruteForce {
-    
+
+    private static final Logger LOGGER = Logger.getLogger(BruteForce.class.getName());
+
+    // Setup for parallelization.
     private final ExecutorService executor;
     private final List<Future<?>> futures;
+
     private PermutationIterator permutationIterator;
 
     // Initial bestRouteLength and bestRoute.
@@ -27,7 +33,7 @@ public class BruteForce {
     private boolean kill = false;
 
     public BruteForce(List<Node> nodes) {
-        System.out.println("Initialize brute-forcing with " + Configuration.INSTANCE.threads + " threads");
+        LOGGER.log(Level.INFO, "Initialize brute-forcing with " + Configuration.INSTANCE.threads + " threads");
         executor = Executors.newFixedThreadPool(Configuration.INSTANCE.threads);
         futures = new ArrayList<>();
         
@@ -36,17 +42,18 @@ public class BruteForce {
     }
 
     private final Runnable searchBestRoute = () -> {
+        LOGGER.log(Level.FINER, "Start runnable");
         Route bestRoute = null;
         var bestRouteLength = Double.MAX_VALUE;
 
         var route = permutationIterator.next();
         while (!kill && route != null) {
             var routeLength = route.getTotalDistance(Configuration.INSTANCE.distanceFunc);
-            System.out.println("Calculate length for route (id = " + route.getId() + "): " + routeLength);
+            LOGGER.log(Level.FINER, "Calculate length for route (id = " + route.getId() + "): " + routeLength);
             
             // Calculate local optimum.
             if (routeLength < bestRouteLength) {
-                System.out.println("Update local best route (old = [id: " + 
+                LOGGER.log(Level.FINER, "Update local best route (old = [id: " +
                     (bestRoute != null ? bestRoute.getId() : "") + ", length: " + 
                     (bestRoute != null ? bestRouteLength : "") + "]): [id: " +
                     route.getId() + ", length: " + routeLength + "]");
@@ -61,7 +68,7 @@ public class BruteForce {
         synchronized (this) {
             if (bestRouteLength < this.bestRouteLength) {
                 assert bestRoute != null;
-                System.out.println("Update global best route (old = [id: " +
+                LOGGER.log(Level.FINE, "Update global best route (old = [id: " +
                     (this.bestRoute != null ? this.bestRoute.getId() : "") + ", length: " + 
                     (this.bestRoute != null ? this.bestRouteLength : "") + "]): [id: " +
                     bestRoute.getId() + ", length: " + bestRouteLength + "]");
@@ -72,14 +79,15 @@ public class BruteForce {
     };
 
     public Route run() {
-        System.out.println("Brute-forcing best route");
+        LOGGER.log(Level.INFO, "Start brute-forcing best route");
         for (int i = 0; i < Configuration.INSTANCE.threads; i++) {
             futures.add(executor.submit(searchBestRoute));
         }
 
         executor.shutdown();
         try {
-            System.out.println("Wait for termination (timeout = " + Configuration.INSTANCE.timeoutInMinutes + " min)");
+            LOGGER.log(Level.INFO,
+                    "Wait for termination (timeout = " + Configuration.INSTANCE.timeoutInMinutes + " min)");
             
             // executorTerminated is true if all threads end in a normal
             // way and the timeout isn't reached yet.
@@ -97,12 +105,12 @@ public class BruteForce {
             }
 
             if (executorTerminated) {
-                System.out.println("Brute-forcing ended because all permutations were brute-forced");
+                LOGGER.log(Level.INFO, "Brute-forcing ended because all permutations were brute-forced");
             } else {
-                System.out.println("Brute-forcing ended through timeout");
+                LOGGER.log(Level.INFO, "Brute-forcing ended through timeout");
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error while await termination of the executor:" + e);
         }
 
         return bestRoute;

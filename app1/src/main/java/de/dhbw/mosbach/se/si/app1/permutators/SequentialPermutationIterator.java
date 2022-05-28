@@ -1,11 +1,11 @@
 package de.dhbw.mosbach.se.si.app1.permutators;
 
+import de.dhbw.mosbach.se.si.tsp.Node;
+import de.dhbw.mosbach.se.si.tsp.Route;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import de.dhbw.mosbach.se.si.tsp.Node;
-import de.dhbw.mosbach.se.si.tsp.Route;
 
 public class SequentialPermutationIterator implements PermutationIterator {
 

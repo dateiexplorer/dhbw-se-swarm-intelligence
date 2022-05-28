@@ -7,9 +7,25 @@ import de.dhbw.mosbach.se.si.util.loader.NodeLoader;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class App {
-    
+
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+
+    static {
+        // Setup logging.
+        try (var stream = App.class
+                .getClassLoader()
+                .getResourceAsStream(Configuration.INSTANCE.loggingPropertiesFile)) {
+            LogManager.getLogManager().readConfiguration(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         var paramConfig = Configuration.INSTANCE.defaultParamConfig;
 
@@ -45,16 +61,15 @@ public class App {
         var deltaInSeconds = ((System.currentTimeMillis() - startTime) / 1000.0);
 
         // Log bestRoute.
-        System.out.println("Best route found (length = " + 
-            bestRoute.getTotalDistance(Configuration.INSTANCE.distanceFunc) + "): " +
-            bestRoute + " in " + deltaInSeconds + "s");
+        LOGGER.log(Level.INFO, "Best route found in " + deltaInSeconds + "s" + " with total length " +
+                bestRoute.getTotalDistance(Configuration.INSTANCE.distanceFunc) + ": " + bestRoute);
     }
 
     public static Route run(ParameterConfiguration paramConfig) {
         // Load TSP data from file.
         var loader = new NodeLoader();
         var nodes = loader.loadNodesFromFile(paramConfig.tspFile());
-        System.out.println("Load TSP with " + nodes.size() + " nodes");
+        LOGGER.log(Level.INFO, "Load TSP problem with " + nodes.size() + " nodes");
 
         // Run optimization process.
         var optimizer = new AntColonyOptimization(nodes, paramConfig);

@@ -10,6 +10,8 @@ import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 public enum Configuration {
     INSTANCE;
 
+    public final String loggingPropertiesFile = "logging.properties";
+
     public final int threads = Runtime.getRuntime().availableProcessors();
 
     public final DistanceFunction distanceFunc = new EuclideanDistance();

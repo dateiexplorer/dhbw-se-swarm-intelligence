@@ -8,6 +8,8 @@ import de.dhbw.mosbach.se.si.util.distance.EuclideanDistance;
 public enum Configuration {
     INSTANCE;
 
+    public final String loggingPropertiesFile = "logging.properties";
+
     public final String tspFile = "a280.tsp";
     public final DistanceFunction distancefunction = new EuclideanDistance();
 

@@ -1,10 +1,16 @@
 package de.dhbw.mosbach.se.si.app3.searcher;
 
 import de.dhbw.mosbach.se.si.app2.parmeter.ParameterConfiguration;
+import de.dhbw.mosbach.se.si.app3.App;
 import de.dhbw.mosbach.se.si.app3.Configuration;
 import de.dhbw.mosbach.se.si.tsp.Route;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class AntColonyParameterSearcher {
+
+    private static final Logger LOGGER = Logger.getLogger(AntColonyParameterSearcher.class.getName());
 
     // Shorten variables a little bit.
     private final Configuration c = Configuration.INSTANCE;
@@ -63,7 +69,8 @@ public class AntColonyParameterSearcher {
 
                                                 var routeLength = route.getTotalDistance(c.distancefunction);
                                                 if (routeLength < bestRouteLength) {
-                                                    System.out.println("New best route found: " + paramConfig);
+                                                    LOGGER.log(Level.INFO,
+                                                            "New best configuration found: " + paramConfig);
                                                     bestParamConfig = paramConfig;
                                                     bestRouteLength = routeLength;
                                                 }
@@ -84,17 +91,14 @@ public class AntColonyParameterSearcher {
     private Route testParameterConfiguration(ParameterConfiguration paramConfig) {
         counter++;
 
-        if (deltaInSeconds == Double.POSITIVE_INFINITY) {
-            System.out.printf("Configuration (%d/%d), Time Remaining (in h): %s\n",
-                    counter, totalNumOfConfigurations,
-                    "Unknown");
-        } else {
-            System.out.printf("Configuration (%d/%d), Time Remaining (in h): %f\n",
-                    counter, totalNumOfConfigurations,
-                    (deltaInSeconds * (totalNumOfConfigurations - counter)) / 3600);
-        }
+        var estimatedTimeRemaining = deltaInSeconds == Double.POSITIVE_INFINITY ?
+                "Unknown" : String.valueOf((deltaInSeconds * (totalNumOfConfigurations - counter)) / 3600);
+        LOGGER.log(Level.INFO, "Test configuration " + counter + "/" + totalNumOfConfigurations + ", " +
+                "Estimated time remaining (in h): " + estimatedTimeRemaining);
 
         var startTime = System.currentTimeMillis();
+
+        // Test the current paramConfig.
         var route = de.dhbw.mosbach.se.si.app2.App.run(paramConfig);
 
         deltaInSeconds = ((System.currentTimeMillis() - startTime) / 1000.0);

@@ -8,6 +8,7 @@ import de.dhbw.mosbach.se.si.tsp.Route;
 
 public class Trail {
 
+    private final Ant ant;
     private final List<Node> nodes;
     private final double[][] distanceMatrix;
 
@@ -16,7 +17,8 @@ public class Trail {
 
     private int currentIndex = 0;
 
-    public Trail(List<Node> nodes, double[][] distanceMatrix) {
+    public Trail(Ant ant, List<Node> nodes, double[][] distanceMatrix) {
+        this.ant = ant;
         this.nodes = nodes;
         this.distanceMatrix = distanceMatrix;
 
@@ -51,5 +53,9 @@ public class Trail {
         }
 
         return new Route(routeId, nodes);
+    }
+
+    public Ant getAnt() {
+        return ant;
     }
 }

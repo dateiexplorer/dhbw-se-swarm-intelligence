@@ -3,6 +3,8 @@ package de.dhbw.mosbach.se.si.app2.agents;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.dhbw.mosbach.se.si.app2.AntColonyOptimization;
 import de.dhbw.mosbach.se.si.tsp.Node;
@@ -10,6 +12,9 @@ import de.dhbw.mosbach.se.si.util.random.RandomGenerator;
 
 public class Ant {
 
+    private static final Logger LOGGER = Logger.getLogger(Ant.class.getName());
+
+    private final long id;
     private final List<Node> nodes;
     private final double[][] distanceMatrix;
 
@@ -22,7 +27,8 @@ public class Ant {
     private final double beta;
     private final double randomFactor;
 
-    public Ant(AntColonyOptimization aco) {
+    public Ant(long id, AntColonyOptimization aco) {
+        this.id = id;
         this.nodes = aco.getNodes();
         this.distanceMatrix = aco.getDistanceMatrix();
 
@@ -46,7 +52,7 @@ public class Ant {
 
     public Trail walkNewTrail(double[][] pheromoneMatrix) {
         clearVisitedInformation();
-        var trail = new Trail(nodes, distanceMatrix);
+        var trail = new Trail(this, nodes, distanceMatrix);
 
         // First add a random node.
         var nodeIndex = randomGenerator.nextInt(numOfNodes);
@@ -61,6 +67,7 @@ public class Ant {
             visited[nextNodeIndex] = true;
         }
 
+        LOGGER.log(Level.FINEST, "New trail for ant " + id + ": " + trail.toRoute(id));
         return trail;
     }
 
@@ -97,6 +104,7 @@ public class Ant {
     }
 
     private double[] calculateProbabilities(int currentNodeIndex, double[][] pheromoneMatrix) {
+        LOGGER.log(Level.FINEST, "Calculate new probabilities for ant " + id);
         var probabilities = new double[numOfNodes];
 
         // Sum up probabilities to norm probabilities.
@@ -141,6 +149,11 @@ public class Ant {
     }
 
     private void clearVisitedInformation() {
+        LOGGER.log(Level.FINEST, "Clear visited information of ant " + id);
         Arrays.fill(visited, false);
+    }
+
+    public long getId() {
+        return id;
     }
 }
