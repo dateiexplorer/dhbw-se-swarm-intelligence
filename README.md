@@ -42,5 +42,5 @@ gradle jar
 
 Afterwards you can run an application for example with:
 ```
-java -jar build/libs/app1.jar
+java -jar app1/build/libs/app1.jar
 ```
