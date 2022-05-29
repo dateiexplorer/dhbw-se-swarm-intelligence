@@ -112,11 +112,14 @@ public class AntColonyOptimization {
     private List<Trail> constructAntSolutionsParallel() {
         var trails = new ArrayList<Trail>();
         try {
+            // Wait for all tasks to finish.
+            // This is an implicit barrier and ensures that all things can be
+            // done in a synchronized way if this method executes successfully.
             for (var future : executor.invokeAll(antSolutionConstructors)) {
                 trails.add(future.get());
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error while execute future tasks: " + e);
         }
 
         return trails;
@@ -238,6 +241,9 @@ public class AntColonyOptimization {
             }
         }
 
+        LOGGER.log(Level.FINER, "Best trail for this iteration with length " + bestTrailLength +
+                " is from ant with id " + bestTrail.getAnt().getId() + ": " +
+                bestTrail.toRoute(bestTrail.getAnt().getId()));
         return bestTrail;
     }
 

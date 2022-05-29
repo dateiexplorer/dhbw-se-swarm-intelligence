@@ -67,7 +67,8 @@ public class Ant {
             visited[nextNodeIndex] = true;
         }
 
-        LOGGER.log(Level.FINEST, "New trail for ant " + id + ": " + trail.toRoute(id));
+        LOGGER.log(Level.FINER, "New trail for ant " + id + " with length " +
+                trail.length() + ": " + trail.toRoute(id));
         return trail;
     }
 
@@ -104,7 +105,6 @@ public class Ant {
     }
 
     private double[] calculateProbabilities(int currentNodeIndex, double[][] pheromoneMatrix) {
-        LOGGER.log(Level.FINEST, "Calculate new probabilities for ant " + id);
         var probabilities = new double[numOfNodes];
 
         // Sum up probabilities to norm probabilities.
